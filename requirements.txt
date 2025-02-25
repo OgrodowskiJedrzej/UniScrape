@@ -1,3 +1,5 @@
 html2text
 beautifulsoup4
 pandas
+requests
+urllib3

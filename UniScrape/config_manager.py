@@ -7,6 +7,9 @@ import os
 
 class ConfigManager:
     def __init__(self, print_to_console: bool = True, log_level=logging.INFO):
+        self.visited_url_folder = "visited/"
+        self.visited_url_file = "visited_urls.csv"
+
         self.print_to_console = print_to_console
         self.logger_print = self.setup_logger_print(print_to_console)
 
