@@ -7,8 +7,11 @@ import os
 import requests
 from requests.adapters import HTTPAdapter
 from urllib3.util.retry import Retry
-
+from urllib.parse import urlparse
+from typing import Tuple
+import re
 from config_manager import ConfigManager
+import process_text
 
 logger_tool = logging.getLogger('UniScrape_tools')
 
@@ -21,24 +24,66 @@ class Scraper:
         self.visited_folder = self.config.visited_url_folder
         self.visited_file = self.config.visited_url_file
 
-    def _scrape_text(self, url: str) -> str:
+    def _scrape_text(self, url: str) -> Tuple[str, str]:
+        """
+        !Returns text and title
+        """
         session = self.create_session(retry_total=1)
         response = session.get(url)
-        return response.text
 
-    def start_scraper(self, ulrs_to_scrap: pd.DataFrame, visited_urls: pd.DataFrame):
+        title = process_text.extract_title_from_url(url=url)
+
+        cleaned_response = process_text.clean_HTML(response.text)
+
+        return cleaned_response, title
+
+    def start_scraper(self, urls_to_scrap: pd.DataFrame, visited_urls: pd.DataFrame) -> int:
         """
-        Initiates scraper process.
+        Initiates scraper process, checks if URLs are already scraped, scrapes new URLs, and updates the visited list.
+        Returns the number of successfully scraped documents.
         """
-        if not ulrs_to_scrap.empty():
-            try:
-                # logic, iterate through urls_to_scrap and plug into function
-                pass
-            except Exception as e:
-                self.logger_tool.error(f"Error in scraper: {e}")
-                self.logger_print.error(f"Error in scraper: {e}")
-        else:
-            self.logger_tool.info(f"No urls to scrap in: {ulrs_to_scrap}")
+        scraped_count = 0
+
+        if urls_to_scrap.empty:
+            self.logger_tool.info("No URLs to scrap.")
+            self.logger_print.info("No URLs to scrap.")
+            return 0
+
+        try:
+            for index, row in urls_to_scrap.iterrows():
+                url = row['url']
+
+                if url in visited_urls['url'].values:
+                    self.logger_tool.info(
+                        f"Skipping already scraped URL: {url}")
+                    self.logger_print.info(
+                        f"Skipping already scraped URL: {url}")
+                    continue
+
+                try:
+                    result, title = self._scrape_text(url)
+                    print(f"TITLE: {title}")
+
+                    # TODO: Logika analizy i zapisu do bazy danych
+
+                    scraped_count += 1
+                    self.logger_print.info(
+                        f"Scraping at index: {index} -> {url}")
+                    self.logger_tool.info(
+                        f"Scraping at index: {index} -> {url}")
+
+                    visited_urls = pd.concat(
+                        [visited_urls, pd.DataFrame({'url': [url]})], ignore_index=True)
+
+                except Exception as e:
+                    self.logger_tool.error(f"Error scraping {url}: {e}")
+                    self.logger_print.error(f"Error scraping {url}: {e}")
+
+        except Exception as e:
+            self.logger_tool.error(f"Error in scraper: {e}")
+            self.logger_print.error(f"Error in scraper: {e}")
+
+        return scraped_count
 
     def create_session(self, retry_total: bool | int = 3, retry_backoff: float = 3.0, verify: bool = False) -> requests.Session:
         session = requests.Session()
