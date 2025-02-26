@@ -1,7 +1,11 @@
-from bs4 import BeautifulSoup
+"""
+Process Module
+
+This module contains functions for cleaning data and process meta-data from scraped pages.
+"""
 import re
 from urllib.parse import urlparse
-from typing import Tuple
+from bs4 import BeautifulSoup
 
 
 def clean_HTML(html: str) -> str:

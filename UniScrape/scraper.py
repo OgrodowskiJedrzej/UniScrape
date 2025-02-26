@@ -1,17 +1,21 @@
+"""
+Scraper Module
+
+This module contains functions for scraping data from provided URLs.
+"""
 import logging
-import asyncio
-# from playwright.async_api import async_playwright
-from bs4 import BeautifulSoup
-import pandas as pd
 import os
 import requests
 from requests.adapters import HTTPAdapter
 import urllib3
 from urllib3.util.retry import Retry
-from urllib.parse import urlparse
 from typing import Tuple
+import pandas as pd
+
 from config_manager import ConfigManager
 import process_text
+from utils import package_to_json
+
 
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
@@ -76,10 +80,11 @@ class Scraper:
 
                 try:
                     result, title = self._scrape_text(url)
-                    print(f"TITLE: {title}\n\n")
-                    print(result)
+                    # print(f"TITLE: {title}\n\n")
+                    # print(result)
 
-                    # TODO: Logika analizy i zapisu do bazy danych
+                    json_result = package_to_json(title, result, url)
+                    print(json_result)
 
                     scraped_count += 1
                     self.logger_print.info(

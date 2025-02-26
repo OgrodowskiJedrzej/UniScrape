@@ -1,5 +1,7 @@
 """
-Config Manager
+Config Manager Module
+
+This module is responsible for configuration and settings used in this project.
 """
 import logging
 import os
