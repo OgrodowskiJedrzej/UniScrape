@@ -11,6 +11,8 @@ class ConfigManager:
     def __init__(self, print_to_console: bool = True, log_level=logging.INFO):
         self.visited_url_folder = "visited/"
         self.visited_url_file = "visited_urls.csv"
+        self.url_to_scrape_folder = "to_scrape/"
+        self.url_to_scrape_file_name = "urls_to_scrape.csv"
 
         self.print_to_console = print_to_console
         self.logger_print = self.setup_logger_print(print_to_console)
@@ -27,6 +29,9 @@ class ConfigManager:
         self.logger_tool.info(20*"*")
         self.logger_tool.info(
             "*** UniScrape - crawler and scraper for University sites ***")
+
+        self.sleep_time = 2
+        self.maximum_links_to_visit = 50
 
     @staticmethod
     def setup_logger_tool(log_file_path: str, log_level):
