@@ -6,12 +6,14 @@ import pandas as pd
 import os
 import requests
 from requests.adapters import HTTPAdapter
+import urllib3
 from urllib3.util.retry import Retry
 from urllib.parse import urlparse
 from typing import Tuple
-import re
 from config_manager import ConfigManager
 import process_text
+
+urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
 logger_tool = logging.getLogger('UniScrape_tools')
 
@@ -26,21 +28,33 @@ class Scraper:
 
     def _scrape_text(self, url: str) -> Tuple[str, str]:
         """
-        !Returns text and title
+        Performs scraping HTML from site and returns clean text.
+
+        Return:
+            str: Cleaned text.
+            str: Title of document extracted from link.
         """
         session = self.create_session(retry_total=1)
         response = session.get(url)
 
-        title = process_text.extract_title_from_url(url=url)
-
-        cleaned_response = process_text.clean_HTML(response.text)
+        if response and response.ok:
+            cleaned_response = process_text.clean_HTML(response.text)
+            title = process_text.process_metadata(response.text)
+        elif not response:
+            self.logger_tool.info(
+                f"Empty response: {url}. Response: {response}")
+        elif not response.ok:
+            self.logger_tool.info(
+                f"Error response: {url}. Response: {response.status_code}")
 
         return cleaned_response, title
 
     def start_scraper(self, urls_to_scrap: pd.DataFrame, visited_urls: pd.DataFrame) -> int:
         """
         Initiates scraper process, checks if URLs are already scraped, scrapes new URLs, and updates the visited list.
-        Returns the number of successfully scraped documents.
+
+        Return:
+            int: Count of scraped documents.
         """
         scraped_count = 0
 
@@ -62,7 +76,8 @@ class Scraper:
 
                 try:
                     result, title = self._scrape_text(url)
-                    print(f"TITLE: {title}")
+                    print(f"TITLE: {title}\n\n")
+                    print(result)
 
                     # TODO: Logika analizy i zapisu do bazy danych
 
@@ -86,6 +101,17 @@ class Scraper:
         return scraped_count
 
     def create_session(self, retry_total: bool | int = 3, retry_backoff: float = 3.0, verify: bool = False) -> requests.Session:
+        """
+        Creates and configures a new session with retry logic for HTTP requests.
+
+        This function initializes a `requests.Session` object and sets up a retry mechanism. It configures the session to retry up to three times with a
+        backoff factor to control the delay between retries. Handles both HTTP and HTTPS requests.
+
+        The function also ensures that SSL certificate verification is disable for the session.
+
+        Return:
+            requests.Session: A configured session object with retry logic.
+        """
         session = requests.Session()
         retry = Retry(total=retry_total, backoff_factor=retry_backoff)
         adapter = HTTPAdapter(max_retries=retry)
@@ -93,8 +119,6 @@ class Scraper:
         session.mount('https://', adapter)
         session.verify = verify
         return session
-
-    # ? Do we need file_name if we assign it globaly?
 
     def append_to_visited_urls(self, urls_dataframe: pd.DataFrame, file_name: str = None, folder=None, mode='a') -> None:
         if file_name is None:

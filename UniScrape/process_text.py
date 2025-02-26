@@ -1,24 +1,29 @@
 from bs4 import BeautifulSoup
 import re
 from urllib.parse import urlparse
+from typing import Tuple
 
 
-def clean_HTML(text: str) -> str:
-    soup = BeautifulSoup(text, "lxml")
+def clean_HTML(html: str) -> str:
+    soup = BeautifulSoup(html, "lxml")
 
     for tag in soup(["script", "style", "nav", "aside", "footer", "form", "noscript", "iframe", "a"]):
         tag.extract()
 
     main_content = soup.find("article") or soup.find("main") or soup.body
 
-    text = main_content.get_text(
+    html = main_content.get_text(
         separator=" ", strip=True) if main_content else soup.get_text(separator=" ", strip=True)
 
-    text = re.sub(r"\s+", " ", text)
+    html = re.sub(r"\s+", " ", html)
 
-    return text
+    return html
 
 
-def extract_title_from_url(url: str) -> str:
-    title = re.sub(r"[^\w\-]", "_", urlparse(url).path) or "index"
-    return title
+def process_metadata(html: str) -> str:
+    soup = BeautifulSoup(html, "html.parser")
+
+    title = soup.find("meta", property="og:title")
+    title_content = title["content"] if title else "Title not found"
+
+    return title_content
