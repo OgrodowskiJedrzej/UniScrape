@@ -14,7 +14,7 @@ import pandas as pd
 
 from config_manager import ConfigManager
 import process_text
-from utils import package_to_json
+from utils import package_to_json, create_session
 
 
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
@@ -38,7 +38,7 @@ class Scraper:
             str: Cleaned text.
             str: Title of document extracted from link.
         """
-        session = self.create_session(retry_total=1)
+        session = create_session(retry_total=1)
         response = session.get(url)
 
         if response and response.ok:
@@ -104,26 +104,6 @@ class Scraper:
             self.logger_print.error(f"Error in scraper: {e}")
 
         return scraped_count
-
-    def create_session(self, retry_total: bool | int = 3, retry_backoff: float = 3.0, verify: bool = False) -> requests.Session:
-        """
-        Creates and configures a new session with retry logic for HTTP requests.
-
-        This function initializes a `requests.Session` object and sets up a retry mechanism. It configures the session to retry up to three times with a
-        backoff factor to control the delay between retries. Handles both HTTP and HTTPS requests.
-
-        The function also ensures that SSL certificate verification is disable for the session.
-
-        Return:
-            requests.Session: A configured session object with retry logic.
-        """
-        session = requests.Session()
-        retry = Retry(total=retry_total, backoff_factor=retry_backoff)
-        adapter = HTTPAdapter(max_retries=retry)
-        session.mount('http://', adapter)
-        session.mount('https://', adapter)
-        session.verify = verify
-        return session
 
     def append_to_visited_urls(self, urls_dataframe: pd.DataFrame, file_name: str = None, folder=None, mode='a') -> None:
         if file_name is None:

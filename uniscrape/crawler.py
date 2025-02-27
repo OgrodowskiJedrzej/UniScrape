@@ -6,6 +6,8 @@ import time
 import pandas as pd
 import os
 
+from utils import create_session
+
 
 class Crawler:
     def __init__(self, config_manager: ConfigManager):
@@ -35,8 +37,9 @@ class Crawler:
                 continue
 
             try:
-                response = requests.get(url, timeout=5, headers={
-                                        "User-Agent": "Mozilla/5.0"})
+                session = create_session()
+                response = session.get(url, timeout=5)
+
                 if response.status_code != 200:
                     continue
 
