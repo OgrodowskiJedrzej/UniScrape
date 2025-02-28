@@ -6,6 +6,8 @@ This module contains functions for cleaning data and process meta-data from scra
 import re
 from urllib.parse import urlparse
 from bs4 import BeautifulSoup
+import emoji
+import fitz
 
 
 def clean_HTML(html: str) -> str:
@@ -16,12 +18,18 @@ def clean_HTML(html: str) -> str:
 
     main_content = soup.find("article") or soup.find("main") or soup.body
 
-    html = main_content.get_text(
+    for header in main_content.find_all(["h1", "h2", "h3", "h4", "h5", "h6"]):
+        header.insert_before("\n" + "#" * int(header.name[1]) + " ")
+
+    text = main_content.get_text(
         separator=" ", strip=True) if main_content else soup.get_text(separator=" ", strip=True)
 
-    html = re.sub(r"\s+", " ", html)
+    text = emoji.replace_emoji(text, replace="")
 
-    return html
+    text = re.sub(r"\s+", " ", text)
+    text = re.sub(r"\n{2,}", "\n", text).strip()
+
+    return text
 
 
 def process_metadata(html: str) -> str:
@@ -31,3 +39,20 @@ def process_metadata(html: str) -> str:
     title_content = title["content"] if title else "Title not found"
 
     return title_content
+
+
+def clean_PDF(text: str) -> str:
+    text = re.sub(r'\s+', ' ', text).strip()
+    text = re.sub(r'(?i)strona \d+|page \d+', '', text)
+    text = "\n".join(line.strip() for line in text.split("\n") if line.strip())
+    return text
+
+
+def process_pdf_metadata(path: str) -> str:
+    doc = fitz.open(path)
+    metadata = doc.metadata
+    return metadata.get("title")
+
+
+def convert_to_markdown(text: str) -> str:
+    pass
