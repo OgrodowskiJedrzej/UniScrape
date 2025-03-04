@@ -12,7 +12,7 @@ class ConfigManager:
         self.visited_url_folder = "visited/"
         self.visited_url_file = "visited_urls.csv"
         self.url_to_scrape_folder = "to_scrape/"
-        self.url_to_scrape_file_name = "urls_to_scrape.csv"
+        self.url_to_scrape_file = "urls_to_scrape.csv"
 
         self.print_to_console = print_to_console
         self.logger_print = self.setup_logger_print(print_to_console)
@@ -31,7 +31,7 @@ class ConfigManager:
             "*** UniScrape - crawler and scraper for University sites ***")
 
         self.sleep_time = 2
-        self.maximum_links_to_visit = 50
+        self.maximum_links_to_visit = 5
 
     @staticmethod
     def setup_logger_tool(log_file_path: str, log_level):

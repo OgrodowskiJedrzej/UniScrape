@@ -53,7 +53,7 @@ class Scraper:
 
         return cleaned_response, title
 
-    def start_scraper(self, urls_to_scrap: pd.DataFrame, visited_urls: pd.DataFrame) -> int:
+    def start_scraper(self, urls_to_scrap: pd.DataFrame) -> int:
         """
         Initiates scraper process, checks if URLs are already scraped, scrapes new URLs, and updates the visited list.
 
@@ -67,6 +67,8 @@ class Scraper:
             self.logger_print.info("No URLs to scrap.")
             return 0
 
+        visited_urls = self.load_visited_urls()
+
         try:
             for index, row in urls_to_scrap.iterrows():
                 url = row['url']
@@ -79,21 +81,19 @@ class Scraper:
                     continue
 
                 try:
-                    result, title = self._scrape_text(url)
-                    # print(f"TITLE: {title}\n\n")
-                    # print(result)
-
-                    json_result = package_to_json(title, result, url)
-                    print(json_result)
-
                     scraped_count += 1
                     self.logger_print.info(
                         f"Scraping at index: {index} -> {url}")
                     self.logger_tool.info(
                         f"Scraping at index: {index} -> {url}")
 
+                    result, title = self._scrape_text(url)
+                    json_result = package_to_json(title, result, url)
+                    print(json_result)
+
                     visited_urls = pd.concat(
                         [visited_urls, pd.DataFrame({'url': [url]})], ignore_index=True)
+                    self.append_to_visited_urls(pd.DataFrame({'url': [url]}))
 
                 except Exception as e:
                     self.logger_tool.error(f"Error scraping {url}: {e}")
@@ -105,7 +105,7 @@ class Scraper:
 
         return scraped_count
 
-    def append_to_visited_urls(self, urls_dataframe: pd.DataFrame, file_name: str = None, folder=None, mode='a') -> None:
+    def append_to_visited_urls(self, urls_dataframe: pd.DataFrame, file_name: str = None, folder: str = None, mode='a') -> None:
         if file_name is None:
             file_name = self.visited_file
         if folder is None:
@@ -113,20 +113,38 @@ class Scraper:
 
         file_path = os.path.join(folder, file_name)
 
+        os.makedirs(folder, exist_ok=True)
+
         try:
-            urls_dataframe.to_csv(file_path, sep='\t',
-                                  mode=mode, index=False, encoding='utf-8')
+            write_header = not os.path.exists(file_path) or mode == 'w'
+            urls_dataframe.to_csv(file_path, sep='\t', mode=mode,
+                                  index=False, encoding='utf-8', header=write_header)
+
             self.logger_tool.info(
-                f"Saved {urls_dataframe.shape} to {file_path}")
+                f"Saved {urls_dataframe.shape} rows to {file_path}")
         except Exception as e:
             self.logger_tool.error(
                 f"Error while saving to file: {file_path}: {e}")
 
-    def create_visited_file(self, urls_dataframe: pd.DataFrame, file_name: str) -> None:
-        if os.path.exists(os.path.join(self.visited_folder, file_name)):
-            self.logger_tool.debug(f"Visited url file already exist!")
+    def load_visited_urls(self, file_name: str = None, folder: str = None) -> pd.DataFrame:
+        if file_name is None:
+            file_name = self.visited_file
+        if folder is None:
+            folder = self.visited_folder
+
+        file_path = os.path.join(folder, file_name)
+
+        if os.path.exists(file_path):
+            try:
+                df = pd.read_csv(file_path, sep='\t', encoding='utf-8')
+                self.logger_tool.info(
+                    f"Loaded {df.shape[0]} visited URLs from {file_path}")
+                return df
+            except Exception as e:
+                self.logger_tool.error(
+                    f"Error loading visited URLs from {file_path}: {e}")
+                return pd.DataFrame(columns=["url"])
         else:
-            self.logger_tool.debug(
-                f"Visited url file not exist - creating new")
-            self.append_to_visited_urls(
-                urls_dataframe=urls_dataframe, file_name=file_name, mode='w')
+            self.logger_tool.info(
+                f"No visited URLs file found, starting fresh.")
+            return pd.DataFrame(columns=["url"])
