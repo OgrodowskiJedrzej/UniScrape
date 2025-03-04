@@ -9,29 +9,33 @@ import os
 
 class ConfigManager:
     def __init__(self, print_to_console: bool = True, log_level=logging.INFO):
-        self.visited_url_folder = "visited/"
+        self.sleep_time = 2
+        self.maximum_links_to_visit = 5
+
+        # Directories
+        self.visited_url_folder = "../visited/"
         self.visited_url_file = "visited_urls.csv"
-        self.url_to_scrape_folder = "to_scrape/"
+        self.url_to_scrape_folder = "../to_scrape/"
         self.url_to_scrape_file = "urls_to_scrape.csv"
 
-        self.print_to_console = print_to_console
-        self.logger_print = self.setup_logger_print(print_to_console)
-
-        self.logs_folder = "logs/"
+        self.logs_folder = "../logs/"
+        self.logs_file = "app_log.log"
         if not os.path.exists(self.logs_folder):
             os.makedirs(self.logs_folder)
 
-        self.logs_path = os.path.join(self.logs_folder, "app_log.log")
+        # Logger
+        self.print_to_console = print_to_console
+        self.logger_print = self.setup_logger_print(print_to_console)
+
+        self.logs_path = os.path.join(self.logs_folder, self.logs_file)
         self.logger_print.info(f"Logs are saved in: {self.logs_path}")
 
         self.logger_tool = self.setup_logger_tool(self.logs_path, log_level)
 
+        # Initialization of logger
         self.logger_tool.info(20*"*")
         self.logger_tool.info(
             "*** UniScrape - crawler and scraper for University sites ***")
-
-        self.sleep_time = 2
-        self.maximum_links_to_visit = 5
 
     @staticmethod
     def setup_logger_tool(log_file_path: str, log_level):
