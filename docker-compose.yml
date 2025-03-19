@@ -1,0 +1,13 @@
+version: '3.8'
+
+services:
+  uniscrape:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: uniscrape_app
+    mem_limit: 6g
+    volumes:
+      - ./uniscrape:/uniscrape
+    environment:
+      - PYTHONUNBUFFERED=1

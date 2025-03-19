@@ -19,8 +19,12 @@ class ConfigManager:
         self.url_to_scrape_file = "urls_to_scrape.csv"
         self.visited_pdfs_file = "../visited/visited_pdfs.csv"
 
+        if not os.path.exists(self.visited_url_folder):
+            os.makedirs(self.visited_url_folder)
+
         self.logs_folder = "../logs/"
         self.logs_file = "app_log.log"
+
         if not os.path.exists(self.logs_folder):
             os.makedirs(self.logs_folder)
 

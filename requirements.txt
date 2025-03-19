@@ -6,3 +6,5 @@ urllib3
 pdf2image
 easyocr
 numpy
+emoji
+pymupdf

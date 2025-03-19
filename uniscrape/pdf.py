@@ -49,7 +49,6 @@ class Pdf:
             for i, img in enumerate(images):
                 text = self.ocr_reader.readtext(np.array(img), detail=0)
                 extracted_text.append(" ".join(text))
-
             text = "\n".join(extracted_text)
 
             return text
