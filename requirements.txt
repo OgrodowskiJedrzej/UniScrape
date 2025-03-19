@@ -3,3 +3,6 @@ beautifulsoup4
 pandas
 requests
 urllib3
+pdf2image
+easyocr
+numpy

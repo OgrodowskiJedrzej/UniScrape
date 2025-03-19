@@ -17,6 +17,7 @@ class ConfigManager:
         self.visited_url_file = "visited_urls.csv"
         self.url_to_scrape_folder = "../to_scrape/"
         self.url_to_scrape_file = "urls_to_scrape.csv"
+        self.visited_pdfs_file = "../visited/visited_pdfs.csv"
 
         self.logs_folder = "../logs/"
         self.logs_file = "app_log.log"
