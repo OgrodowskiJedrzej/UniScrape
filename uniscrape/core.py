@@ -3,9 +3,7 @@ from crawler import Crawler
 from scraper import Scraper
 from pdf import Pdf
 
-import pandas as pd
 import logging
-import os
 
 config = ConfigManager(
     print_to_console=True
@@ -28,5 +26,5 @@ def crawl_and_scrape():
 
 def scrape_pdfs(folder: str) -> None:
     scraper = Pdf(config_manager=config)
-    count = scraper.start_scraper_pdf(folder_path=folder)
-    print(f'\n\n {count}')
+    docs = scraper.start_scraper_pdf(folder_path=folder)
+    config.logger_tool.info(f"Scraped {docs} documents.")

@@ -10,9 +10,12 @@ import easyocr
 import numpy as np
 import os
 import pandas as pd
+from typing import Tuple
+
 
 from config_manager import ConfigManager
 from process_text import clean_PDF, process_pdf_metadata
+from utils import package_to_json
 
 logger_tool = logging.getLogger('UniScrape_tools')
 
@@ -26,15 +29,17 @@ class Pdf:
         self.visited_pdfs = self.load_visited_pdfs()
         self.ocr_reader = easyocr.Reader(['pl', 'en'])
 
-    def _get_text_from_pdf(self, path: str) -> str:
+    def _get_text_from_pdf(self, path: str) -> Tuple[str, str]:
         doc = pymupdf.open(path)
         text = "\n".join(page.get_text() for page in doc)
+        title = process_pdf_metadata(path)
 
-        if text.strip():
-            return text
+        if not text.strip():
+            self.logger_tool.warning(f"Using OCR for {path}...")
+            text = self._extract_text_with_ocr(path)
+        text = clean_PDF(text=text)
 
-        self.logger_tool.warning(f"Using OCR for {path}...")
-        return self._extract_text_with_ocr(path)
+        return title, text
 
     def _extract_text_with_ocr(self, path: str) -> str:
         try:
@@ -45,7 +50,9 @@ class Pdf:
                 text = self.ocr_reader.readtext(np.array(img), detail=0)
                 extracted_text.append(" ".join(text))
 
-            return "\n".join(extracted_text)
+            text = "\n".join(extracted_text)
+
+            return text
 
         except Exception as e:
             self.logger_tool.error(f"Error for OCR, PDF {path}: {str(e)}")
@@ -75,8 +82,11 @@ class Pdf:
                 self.logger_print.info(f"Scraping pdf: {pdf_name}")
                 self.logger_tool.info(f"Scraping pdf: {pdf_name}")
 
-                text = self._get_text_from_pdf(pdf_path)
-                print(text)
+                title, text = self._get_text_from_pdf(pdf_path)
+                json_result = package_to_json(
+                    title=title, content=text, source=pdf_name)
+                print(json_result)
+
                 self.append_to_visited_pdfs(pdf_name)
                 scraped_count += 1
 
