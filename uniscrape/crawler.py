@@ -1,5 +1,9 @@
+"""
+Crawler Module
+
+Crawler module is responsible for crawling through website and collect urls.
+"""
 from config_manager import ConfigManager
-import requests
 from urllib.parse import urljoin, urlparse
 from bs4 import BeautifulSoup
 import time
@@ -20,10 +24,22 @@ class Crawler:
         self.file_name = config_manager.url_to_scrape_file
 
     def _normalize_url(self, url: str):
+        """
+        This function is responsible for normalizing urls to avoid double scraping.
+
+        Returns:
+            str: Normalized url.
+        """
         parsed = urlparse(url)
         return parsed.scheme + "://" + parsed.netloc + parsed.path
 
     def start_crawler(self, starting_url: str) -> bool:
+        """
+        This function is responsible for crawling websites with respect to self.maximum_links and saving visited urls.
+
+        Returns:
+            bool: True if crawling ended with no errors, False otherwise.
+        """
         visited_urls = set()
         urls_to_visit = [starting_url]
 
@@ -50,6 +66,7 @@ class Crawler:
                 visited_urls.add(normalized_url)
                 self.logger_tool.info(f"Added url: {url}")
 
+                # Find urls on current website
                 soup = BeautifulSoup(response.text, 'html.parser')
                 for link in soup.find_all('a', href=True):
                     full_url = urljoin(url, link['href'])

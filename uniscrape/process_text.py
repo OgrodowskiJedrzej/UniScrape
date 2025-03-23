@@ -7,7 +7,7 @@ import re
 from urllib.parse import urlparse
 from bs4 import BeautifulSoup
 import emoji
-import fitz
+import pymupdf
 
 
 def clean_HTML(html: str) -> str:
@@ -44,15 +44,13 @@ def process_metadata(html: str) -> str:
 def clean_PDF(text: str) -> str:
     text = re.sub(r'\s+', ' ', text).strip()
     text = re.sub(r'(?i)strona \d+|page \d+', '', text)
+    text = re.sub(r'[•●▪■□▸▹►◄◦→←↓↑⇨]', '', text)
     text = "\n".join(line.strip() for line in text.split("\n") if line.strip())
+    text = emoji.replace_emoji(text, replace="")
     return text
 
 
 def process_pdf_metadata(path: str) -> str:
-    doc = fitz.open(path)
+    doc = pymupdf.open(path)
     metadata = doc.metadata
     return metadata.get("title")
-
-
-def convert_to_markdown(text: str) -> str:
-    pass

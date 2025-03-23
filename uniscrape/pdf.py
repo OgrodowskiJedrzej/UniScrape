@@ -27,9 +27,16 @@ class Pdf:
         self.logger_print = self.config.logger_print
         self.visited_pdfs_file = self.config.visited_pdfs_file
         self.visited_pdfs = self.load_visited_pdfs()
-        self.ocr_reader = easyocr.Reader(['pl', 'en'])
+        self.ocr_reader = easyocr.Reader(['pl', 'en'], gpu=False)
 
     def _get_text_from_pdf(self, path: str) -> Tuple[str, str]:
+        """
+        This function scrapes text from pdf file and extract title.
+
+        Returns:
+            str: Title of pdf file.
+            str: Content of pdf file.
+        """
         doc = pymupdf.open(path)
         text = "\n".join(page.get_text() for page in doc)
         title = process_pdf_metadata(path)
@@ -42,6 +49,12 @@ class Pdf:
         return title, text
 
     def _extract_text_with_ocr(self, path: str) -> str:
+        """
+        This function is responsible to get text from fake pdfs and images. It converts input to image and then use OCR to scrape text.
+
+        Returns:
+            str: Scraped text.
+        """
         try:
             images = convert_from_path(path, dpi=300)
             extracted_text = []
