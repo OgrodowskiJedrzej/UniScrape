@@ -9,6 +9,7 @@ class CustomInstallCommand(install):
         with open('to_scrape/urls_to_scrape.csv', 'w') as f:
             f.write('url\n')
 
+        os.makedirs('logs/', exist_ok=True)
         log_file_path = os.path.join('logs/', 'app_log.log')
         if not os.path.exists(log_file_path):
             with open(log_file_path, 'w') as f:
