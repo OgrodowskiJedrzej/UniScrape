@@ -24,7 +24,10 @@ def crawl_and_scrape():
         config.logger_tool.info(f"Scraped {docs} documents.")
 
 
-def scrape_pdfs(folder: str) -> None:
+def scrape_pdfs() -> None:
     scraper = Pdf(config_manager=config)
-    docs = scraper.start_scraper_pdf(folder_path=folder)
+    docs = scraper.start_scraper_pdf(config.pdfs_to_scrape)
     config.logger_tool.info(f"Scraped {docs} documents.")
+
+
+scrape_pdfs()

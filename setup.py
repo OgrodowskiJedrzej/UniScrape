@@ -8,6 +8,14 @@ class CustomInstallCommand(install):
         os.makedirs('to_scrape/pdfs', exist_ok=True)
         with open('to_scrape/urls_to_scrape.csv', 'w') as f:
             f.write('url\n')
+
+        log_file_path = os.path.join('logs/', 'app_log.log')
+        if not os.path.exists(log_file_path):
+            with open(log_file_path, 'w') as f:
+                pass
+
+        os.makedirs('visited', exist_ok=True)
+
         install.run(self)
 
 
