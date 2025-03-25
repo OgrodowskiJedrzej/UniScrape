@@ -14,7 +14,7 @@ import pandas as pd
 
 from config_manager import ConfigManager
 import process_text
-from utils import package_to_json, create_session
+from utils import package_to_json, create_session, get_timestamp
 
 
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
@@ -88,7 +88,8 @@ class Scraper:
                         f"Scraping at index: {index} -> {url}")
 
                     result, title = self._scrape_text(url)
-                    json_result = package_to_json(title, result, url)
+                    date = get_timestamp()
+                    json_result = package_to_json(title, result, url, date)
                     print(json_result)
 
                     visited_urls = pd.concat(

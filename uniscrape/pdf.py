@@ -15,7 +15,7 @@ from typing import Tuple
 
 from config_manager import ConfigManager
 from process_text import clean_PDF, process_pdf_metadata
-from utils import package_to_json
+from utils import package_to_json, get_timestamp
 
 logger_tool = logging.getLogger('UniScrape_tools')
 
@@ -97,8 +97,9 @@ class Pdf:
                 self.logger_tool.info(f"Scraping pdf: {pdf_name}")
 
                 title, text = self._get_text_from_pdf(pdf_path)
+                date = get_timestamp()
                 json_result = package_to_json(
-                    title=title, content=text, source=pdf_name)
+                    title=title, content=text, source=pdf_name, timestamp=date)
                 print(json_result)
 
                 self.append_to_visited_pdfs(pdf_name)

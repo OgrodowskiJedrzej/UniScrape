@@ -8,13 +8,17 @@ import requests
 from requests.adapters import HTTPAdapter
 import urllib3
 from urllib3.util.retry import Retry
+from datetime import datetime
 
 
-def package_to_json(title: str, content: str, source: str) -> dict:
+def package_to_json(title: str, content: str, source: str, timestamp: datetime) -> dict:
     data = {
-        "title": title,
-        "content": content,
-        "source": source
+        "metadata": {
+            "title": title,
+            "date": timestamp,
+            "source": source
+        },
+        "content": content
     }
 
     return json.dumps(data, indent=4, ensure_ascii=False)
@@ -39,3 +43,13 @@ def create_session(retry_total: bool | int = 3, retry_backoff: float = 3.0, veri
     session.mount('https://', adapter)
     session.verify = verify
     return session
+
+
+def get_timestamp():
+    """
+        Creates timestamp.
+
+        Returns: 
+            datetime: timestamp in format YYYY-MM-DD HH-MM-SS eg. 2025-03-25 21:37:35
+    """
+    return datetime.now().strftime("%Y-%m-%d %H:%M:%S")
