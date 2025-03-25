@@ -43,7 +43,7 @@ class Scraper:
 
         if response and response.ok:
             cleaned_response = process_text.clean_HTML(response.text)
-            title = process_text.process_metadata(response.text)
+            title = process_text.process_web_metadata(response.text)
         elif not response:
             self.logger_tool.info(
                 f"Empty response: {url}. Response: {response}")

@@ -39,11 +39,13 @@ class Pdf:
         """
         doc = pymupdf.open(path)
         text = "\n".join(page.get_text() for page in doc)
-        title = process_pdf_metadata(path)
 
+        # If no text is recognized, use OCR
         if not text.strip():
             self.logger_tool.warning(f"Using OCR for {path}...")
             text = self._extract_text_with_ocr(path)
+
+        title = process_pdf_metadata(path)
         text = clean_PDF(text=text)
 
         return title, text

@@ -6,8 +6,11 @@ services:
       context: .
       dockerfile: Dockerfile
     container_name: uniscrape_app
-    mem_limit: 6g
     volumes:
       - ./uniscrape:/uniscrape
     environment:
       - PYTHONUNBUFFERED=1
+    deploy:
+      resources:
+        limits:
+          memory: 8G

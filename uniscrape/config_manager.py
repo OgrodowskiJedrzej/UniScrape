@@ -13,15 +13,15 @@ class ConfigManager:
         self.maximum_links_to_visit = 5
 
         # Directories
-        self.visited_url_folder = "../visited/"
+        self.visited_url_folder = "visited/"
         self.visited_url_file = "visited_urls.csv"
-        self.url_to_scrape_folder = "../to_scrape/"
+        self.url_to_scrape_folder = "to_scrape/"
         self.url_to_scrape_file = "urls_to_scrape.csv"
-        self.pdfs_to_scrape = "../to_scrape/pdfs/"
-        self.visited_pdfs_file = "../visited/visited_pdfs.csv"
+        self.pdfs_to_scrape = "to_scrape/pdfs/"
+        self.visited_pdfs_file = "visited/visited_pdfs.csv"
 
         # Logger
-        self.logs_folder = "../logs/"
+        self.logs_folder = "logs/"
         self.logs_file = "app_log.log"
 
         self.print_to_console = print_to_console

@@ -18,9 +18,6 @@ def clean_HTML(html: str) -> str:
 
     main_content = soup.find("article") or soup.find("main") or soup.body
 
-    for header in main_content.find_all(["h1", "h2", "h3", "h4", "h5", "h6"]):
-        header.insert_before("\n" + "#" * int(header.name[1]) + " ")
-
     text = main_content.get_text(
         separator=" ", strip=True) if main_content else soup.get_text(separator=" ", strip=True)
 
@@ -32,15 +29,6 @@ def clean_HTML(html: str) -> str:
     return text
 
 
-def process_metadata(html: str) -> str:
-    soup = BeautifulSoup(html, "html.parser")
-
-    title = soup.find("meta", property="og:title")
-    title_content = title["content"] if title else "Title not found"
-
-    return title_content
-
-
 def clean_PDF(text: str) -> str:
     text = re.sub(r'\s+', ' ', text).strip()
     text = re.sub(r'(?i)strona \d+|page \d+', '', text)
@@ -48,6 +36,15 @@ def clean_PDF(text: str) -> str:
     text = "\n".join(line.strip() for line in text.split("\n") if line.strip())
     text = emoji.replace_emoji(text, replace="")
     return text
+
+
+def process_web_metadata(html: str) -> str:
+    soup = BeautifulSoup(html, "html.parser")
+
+    title = soup.find("meta", property="og:title")
+    title_content = title["content"] if title else "Title not found"
+
+    return title_content
 
 
 def process_pdf_metadata(path: str) -> str:

@@ -1,5 +1,5 @@
 import os
-from setuptools import setup
+from setuptools import setup, find_packages
 from setuptools.command.install import install
 
 
@@ -20,10 +20,16 @@ class CustomInstallCommand(install):
         install.run(self)
 
 
+def load_requirements(filename="requirements.txt"):
+    with open(filename) as f:
+        return f.read().splitlines()
+
+
 setup(
     name='UniScrape',
-    packages=['uniscrape'],
+    packages=find_packages(),
     cmdclass={
         'install': CustomInstallCommand,
-    }
+    },
+    install_requires=load_requirements()
 )
