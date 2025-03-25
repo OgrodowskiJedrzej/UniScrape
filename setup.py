@@ -26,7 +26,7 @@ def load_requirements(filename="requirements.txt"):
 
 
 setup(
-    name='UniScrape',
+    name='statutscan-data-scraping',
     packages=find_packages(),
     cmdclass={
         'install': CustomInstallCommand,
